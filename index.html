@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengacak 4 Angka dengan Analisis History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .number-display {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .pulse-animation {
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body class="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-indigo-800 mb-2">🎲 Pengacak 4 Angka</h1>
+            <p class="text-gray-600">Analisis pola berdasarkan history 4 periode sebelumnya</p>
+        </header>
+
+        <main class="max-w-4xl mx-auto">
+            <!-- Input History Section -->
+            <section class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">📊 Data History 4 Periode Terakhir</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div>
+                        <label for="period1" class="block text-sm font-medium text-gray-700 mb-2">Periode 1 (Terlama)</label>
+                        <input type="text" id="period1" maxlength="4" placeholder="0000" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-center text-xl font-mono">
+                    </div>
+                    <div>
+                        <label for="period2" class="block text-sm font-medium text-gray-700 mb-2">Periode 2</label>
+                        <input type="text" id="period2" maxlength="4" placeholder="0000" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-center text-xl font-mono">
+                    </div>
+                    <div>
+                        <label for="period3" class="block text-sm font-medium text-gray-700 mb-2">Periode 3</label>
+                        <input type="text" id="period3" maxlength="4" placeholder="0000" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-center text-xl font-mono">
+                    </div>
+                    <div>
+                        <label for="period4" class="block text-sm font-medium text-gray-700 mb-2">Periode 4 (Terbaru)</label>
+                        <input type="text" id="period4" maxlength="4" placeholder="0000" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-center text-xl font-mono">
+                    </div>
+                </div>
+                <button onclick="analyzeHistory()" 
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                    🔍 Analisis Data History
+                </button>
+            </section>
+
+            <!-- Analysis Results -->
+            <section id="analysisSection" class="bg-white rounded-xl shadow-lg p-6 mb-8 hidden">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">📈 Hasil Analisis Pola</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-blue-800 mb-2">Frekuensi Angka</h3>
+                        <div id="frequencyAnalysis" class="text-sm"></div>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-green-800 mb-2">Pola Posisi</h3>
+                        <div id="positionAnalysis" class="text-sm"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Random Generator Section -->
+            <section class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">🎯 Generator Prediksi</h2>
+                <div class="text-center mb-6">
+                    <div id="resultDisplay" class="flex justify-center space-x-4 mb-6">
+                        <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-2xl font-bold text-gray-500">?</div>
+                        <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-2xl font-bold text-gray-500">?</div>
+                        <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-2xl font-bold text-gray-500">?</div>
+                        <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-2xl font-bold text-gray-500">?</div>
+                    </div>
+                    <div class="space-y-4">
+                        <button onclick="generateRandom()" 
+                                class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-200 mr-4">
+                            🎲 Acak Murni
+                        </button>
+                        <button onclick="generatePrediction()" 
+                                class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-200">
+                            🔮 Prediksi Berdasarkan Pola
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results History -->
+            <section class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">📝 Riwayat Hasil</h2>
+                <div id="resultsHistory" class="space-y-2">
+                    <p class="text-gray-500 text-center py-4">Belum ada hasil yang dihasilkan</p>
+                </div>
+                <button onclick="clearHistory()" 
+                        class="mt-4 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
+                    🗑️ Hapus Riwayat
+                </button>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        let historyData = [];
+        let resultsHistory = [];
+        let analysisData = null;
+
+        // Format input to only accept numbers
+        document.querySelectorAll('input[type="text"]').forEach(input => {
+            input.addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);
+            });
+        });
+
+        function analyzeHistory() {
+            const periods = [
+                document.getElementById('period1').value,
+                document.getElementById('period2').value,
+                document.getElementById('period3').value,
+                document.getElementById('period4').value
+            ];
+
+            // Validate input
+            if (periods.some(p => p.length !== 4)) {
+                alert('Mohon isi semua periode dengan 4 angka');
+                return;
+            }
+
+            historyData = periods;
+            
+            // Analyze frequency
+            const frequency = {};
+            const positionFreq = [{}, {}, {}, {}];
+            
+            periods.forEach(period => {
+                for (let i = 0; i < 4; i++) {
+                    const digit = period[i];
+                    frequency[digit] = (frequency[digit] || 0) + 1;
+                    positionFreq[i][digit] = (positionFreq[i][digit] || 0) + 1;
+                }
+            });
+
+            analysisData = { frequency, positionFreq };
+            displayAnalysis();
+        }
+
+        function displayAnalysis() {
+            const { frequency, positionFreq } = analysisData;
+            
+            // Display frequency analysis
+            const freqDiv = document.getElementById('frequencyAnalysis');
+            const sortedFreq = Object.entries(frequency).sort((a, b) => b[1] - a[1]);
+            freqDiv.innerHTML = sortedFreq.map(([digit, count]) => 
+                `<div class="flex justify-between"><span>Angka ${digit}:</span><span>${count}x</span></div>`
+            ).join('');
+
+            // Display position analysis
+            const posDiv = document.getElementById('positionAnalysis');
+            let posHtml = '';
+            positionFreq.forEach((pos, index) => {
+                const mostFreq = Object.entries(pos).sort((a, b) => b[1] - a[1])[0];
+                if (mostFreq) {
+                    posHtml += `<div>Posisi ${index + 1}: Angka ${mostFreq[0]} (${mostFreq[1]}x)</div>`;
+                }
+            });
+            posDiv.innerHTML = posHtml;
+
+            document.getElementById('analysisSection').classList.remove('hidden');
+        }
+
+        function generateRandom() {
+            const result = [];
+            for (let i = 0; i < 4; i++) {
+                result.push(Math.floor(Math.random() * 10));
+            }
+            displayResult(result, 'Acak Murni');
+        }
+
+        function generatePrediction() {
+            if (!analysisData) {
+                alert('Mohon analisis data history terlebih dahulu');
+                return;
+            }
+
+            const { frequency, positionFreq } = analysisData;
+            const result = [];
+
+            // Advanced prediction algorithm
+            for (let i = 0; i < 4; i++) {
+                const posFreq = positionFreq[i];
+                const digits = Object.keys(posFreq);
+                
+                if (digits.length > 0) {
+                    // Calculate weighted probability for each digit
+                    const weights = {};
+                    let totalWeight = 0;
+                    
+                    digits.forEach(digit => {
+                        // Base weight from position frequency
+                        let weight = posFreq[digit] * 100;
+                        
+                        // Bonus weight from overall frequency
+                        weight += (frequency[digit] || 0) * 25;
+                        
+                        // Pattern analysis: check sequence patterns
+                        weight += analyzeSequencePattern(digit, i);
+                        
+                        // Gap analysis: prefer digits that haven't appeared recently in this position
+                        weight += analyzeGapPattern(digit, i);
+                        
+                        weights[digit] = weight;
+                        totalWeight += weight;
+                    });
+                    
+                    // Add missing digits with lower probability
+                    for (let d = 0; d <= 9; d++) {
+                        if (!weights[d.toString()]) {
+                            const baseWeight = 10; // Low base weight for unseen digits
+                            weights[d.toString()] = baseWeight + analyzeGapPattern(d.toString(), i);
+                            totalWeight += weights[d.toString()];
+                        }
+                    }
+                    
+                    // Weighted random selection
+                    let random = Math.random() * totalWeight;
+                    for (const [digit, weight] of Object.entries(weights)) {
+                        random -= weight;
+                        if (random <= 0) {
+                            result.push(parseInt(digit));
+                            break;
+                        }
+                    }
+                } else {
+                    // Fallback to smart random for positions with no history
+                    result.push(getSmartRandom(i));
+                }
+            }
+
+            displayResult(result, 'Prediksi Presisi');
+        }
+
+        function analyzeSequencePattern(digit, position) {
+            let bonus = 0;
+            const digitNum = parseInt(digit);
+            
+            // Check for ascending/descending patterns
+            if (historyData.length >= 2) {
+                const lastPeriod = historyData[historyData.length - 1];
+                const prevPeriod = historyData[historyData.length - 2];
+                
+                if (position > 0 && lastPeriod[position - 1]) {
+                    const prevDigit = parseInt(lastPeriod[position - 1]);
+                    const diff = digitNum - prevDigit;
+                    
+                    // Bonus for continuing patterns
+                    if (Math.abs(diff) === 1) bonus += 30; // Sequential pattern
+                    if (diff === 0) bonus += 15; // Repetition pattern
+                }
+                
+                // Cross-period pattern analysis
+                const lastDigit = parseInt(lastPeriod[position]);
+                const prevDigit = parseInt(prevPeriod[position]);
+                const trend = lastDigit - prevDigit;
+                
+                if (trend !== 0) {
+                    const expectedNext = lastDigit + trend;
+                    if (expectedNext >= 0 && expectedNext <= 9 && expectedNext === digitNum) {
+                        bonus += 50; // Strong trend continuation
+                    }
+                }
+            }
+            
+            return bonus;
+        }
+
+        function analyzeGapPattern(digit, position) {
+            let bonus = 0;
+            const digitNum = parseInt(digit);
+            
+            // Calculate how long since this digit appeared in this position
+            let gapCount = 0;
+            for (let i = historyData.length - 1; i >= 0; i--) {
+                if (parseInt(historyData[i][position]) === digitNum) {
+                    break;
+                }
+                gapCount++;
+            }
+            
+            // Bonus for digits that haven't appeared recently (due for appearance)
+            if (gapCount >= 3) bonus += 40;
+            else if (gapCount === 2) bonus += 20;
+            else if (gapCount === 1) bonus += 10;
+            else if (gapCount === 0) bonus -= 20; // Penalty for just appeared
+            
+            return bonus;
+        }
+
+        function getSmartRandom(position) {
+            // Use overall frequency data for smart random
+            if (analysisData && Object.keys(analysisData.frequency).length > 0) {
+                const freqEntries = Object.entries(analysisData.frequency);
+                const totalFreq = freqEntries.reduce((sum, [_, freq]) => sum + freq, 0);
+                
+                let random = Math.random() * totalFreq;
+                for (const [digit, freq] of freqEntries) {
+                    random -= freq;
+                    if (random <= 0) {
+                        return parseInt(digit);
+                    }
+                }
+            }
+            
+            return Math.floor(Math.random() * 10);
+        }
+
+        function displayResult(numbers, type) {
+            const displays = document.querySelectorAll('#resultDisplay > div');
+            
+            // Animate each number
+            displays.forEach((display, index) => {
+                setTimeout(() => {
+                    display.className = 'w-16 h-16 bg-indigo-600 rounded-lg flex items-center justify-center text-2xl font-bold text-white number-display pulse-animation';
+                    display.textContent = numbers[index];
+                    
+                    setTimeout(() => {
+                        display.classList.remove('pulse-animation');
+                    }, 1000);
+                }, index * 200);
+            });
+
+            // Add to history
+            const timestamp = new Date().toLocaleString('id-ID');
+            const resultString = numbers.join('');
+            resultsHistory.unshift({ numbers: resultString, type, timestamp });
+            
+            // Keep only last 10 results
+            if (resultsHistory.length > 10) {
+                resultsHistory = resultsHistory.slice(0, 10);
+            }
+            
+            updateHistoryDisplay();
+        }
+
+        function updateHistoryDisplay() {
+            const historyDiv = document.getElementById('resultsHistory');
+            
+            if (resultsHistory.length === 0) {
+                historyDiv.innerHTML = '<p class="text-gray-500 text-center py-4">Belum ada hasil yang dihasilkan</p>';
+                return;
+            }
+
+            historyDiv.innerHTML = resultsHistory.map(result => 
+                `<div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-4">
+                        <span class="font-mono text-xl font-bold text-indigo-600">${result.numbers}</span>
+                        <span class="text-sm px-2 py-1 rounded-full ${result.type === 'Acak Murni' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800'}">${result.type}</span>
+                    </div>
+                    <span class="text-sm text-gray-500">${result.timestamp}</span>
+                </div>`
+            ).join('');
+        }
+
+        function clearHistory() {
+            if (confirm('Yakin ingin menghapus semua riwayat hasil?')) {
+                resultsHistory = [];
+                updateHistoryDisplay();
+            }
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'992a4d1143a3f46d',t:'MTc2MTE0OTgwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
